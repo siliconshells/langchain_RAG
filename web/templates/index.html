@@ -47,7 +47,7 @@
         <div id="answer" class="answer" tabindex="0">—</div>
       </div>
 
-      <!-- BACK: sample description panel -->
+      <!-- BACK: description panel -->
       <div class="card card-back" id="cardBack" aria-label="Sample description" tabindex="-1">
         <div class="back-grid">
           <h2 class="back-title">RAG Project Description</h2>
@@ -67,7 +67,7 @@
           <div>
             <p class="back-lead">The question is entered into the <strong>Flask</strong> frontend application. It's sent to the <strong>FastAPI GraphQL</strong> backend which calls the function to start executing the steps of the <strong>LangGraph</strong>. An embedding is created from the question and a similarity search done in <strong>Pinecone</strong> to find semantically related text to the question.</p>
             <p>This is the context, and it is added to the question to create a prompt for <strong>Google's Gemini Flash</strong> chat model. The answer is returned through the same pipeline and displayed on the <strong>Flask Frontend</strong> application.</p>
-            <p>This RAG application can be used for any website. Just change the website in the code on GitHub.</p>
+            <p>This RAG application can be used for any website. Just change the website in the code on GitHub. It can also be adapted for other data sources by changing the loader.</p>
           </div>
         </div>
       </div>
