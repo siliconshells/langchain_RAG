@@ -8,6 +8,8 @@ A screenshot of the application is shown above. The user enters a question in th
 The RAG application uses my personal website https://www.leonardeshun.com/ as the source of information to answer questions. The website is crawled and the contents are stored in Pinecone for later retrieval.
 <br>
 
+Please find it hosted here: https://langgraph-rag.leonardeshun.com
+<br>
 ### A Screenshot of the Description Card
 ![A screenshot of the application](images/description_card.png)
 A screenshot of the description card is shown above. It describes the indexing and question-and-answer processes of the application.     
@@ -28,20 +30,6 @@ The question is entered into the Flask frontend application. It's sent to the Fa
 This is the context, and it is added to the question to create a prompt for Google's Gemini Flash chat model to generate the answers. The answer is returned through the same pipeline and displayed on the Flask Frontend application.     
 <br>
 This RAG application can be used for any website. Just change the website in the code on GitHub.
-
-### Technologies Used
-- LangSmith
-- LangGraph
-- FastAPI
-- Strawberry GraphQL
-- Flask
-- Pinecone
-- Google Gemini Flash 2.5 model
-- Python
-- HTML/CSS/JavaScript
-- OpenAI's text-embedding-3-large model
-- BeautifulSoup
-- Python-dotenv
 
 ### To run the application
 1. Clone the repository
@@ -68,7 +56,7 @@ I deployed it on AWS EC2 and will be deploying on Google Cloud soon. The steps t
 1. Install `tmux` to keep the application running after logging out of the instance.
 1. Start a new `tmux` session using `tmux new -s session_one`
 1. Run the FastAPI backend using `uvicorn app.backend:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 200`
-1. Detach that session and start a new `tmux` session using `tmux new -s session_two`
+1. Detach that session (Ctrl + B then d) and start a new `tmux` session using `tmux new -s session_two`
 1. Run the Flask frontend using `gunicorn -w 4 -b 127.0.0.1:5070 "web.frontend_app:app" --timeout 300`.   
 1. Enable port forwarding from port 80 to port 5070 using `sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 5070` or let the security group handle allow port 5070. 
 1. Access the application via the public IP address of the EC2 instance.
@@ -93,3 +81,17 @@ source .venv/bin/activate
 pip install -U pip
 pip install -r requirements.txt
 ```
+
+### Technologies Used
+- LangSmith
+- LangGraph
+- FastAPI
+- Strawberry GraphQL
+- Flask
+- Pinecone
+- Google Gemini Flash 2.5 model
+- Python
+- HTML/CSS/JavaScript
+- OpenAI's text-embedding-3-large model
+- BeautifulSoup
+- Python-dotenv
