@@ -3,8 +3,11 @@ uvicorn[standard]
 strawberry-graphql
 langchain-text-splitters
 langchain-community
+langchain-google-genai
 langgraph
 langchain-openai
 langchain-pinecone
 python-dotenv
 beautifulsoup4
+flask
+gunicorn

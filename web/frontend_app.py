@@ -7,7 +7,7 @@ import requests
 #   http://localhost:8000/greetings
 #   https://your.domain/greetings
 FASTAPI_GRAPHQL_URL = os.getenv(
-    "FASTAPI_GRAPHQL_URL", "http://localhost:8000/greetings"
+    "FASTAPI_GRAPHQL_URL", "http://localhost:8000/v1/graphql"
 )
 
 app = Flask(__name__, static_folder="static", template_folder="templates")

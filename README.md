@@ -30,7 +30,7 @@ This is the context, and it is added to the question to create a prompt for Goog
 This RAG application can be used for any website. Just change the website in the code on GitHub.
 
 ### Technologies Used
-- LangChain
+- LangSmith
 - LangGraph
 - FastAPI
 - Strawberry GraphQL
@@ -52,16 +52,36 @@ This RAG application can be used for any website. Just change the website in the
    - OPENAI_API_KEY=Your_OpenAI_API_key
    - LANGSMITH_API_KEY=Your_Pinecone_environment
    - LANGSMITH_TRACING=true
-1. Run the FastAPI backend using `uvicorn app.backend:app --host 0.0.0.0 --port 8000`
-1. Run the Flask frontend using `python web/frontend_app.py`
+1. Run the FastAPI backend using `uvicorn app.backend:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 200`
+1. Run the Flask frontend using `python web/frontend_app.py` for development or `gunicorn -w 4 -b 127.0.0.1:5070 "web.frontend_app:app" --timeout 300` for production.
 1. Go to `http://localhost:5070` to access the application
 
 ### Deployment
 I may deploy this application using Docker and hosted on a cloud platform using services like Google Cloud Run or AWS Fargate to run the Docker containers soon. Another option is to use a cloud compute service like Google Compute Engine or AWS EC2 to run the application directly on a virtual machine. However, the easiest option is to deploy it on th LangChain Hub. I'll decide soon.
 
+I deployed it on AWS EC2 and will be deploying on Google Cloud soon. The steps to deploy on AWS EC2 are:
+1. Create a free EC2 instance with a security group that allows inbound traffic on ports 80 and 443.
+1. Connect to the instance via Amazon EC2 Instance Connect.
+1. Clone this repository to the instance.
+1. Install the required packages using `pip install -r requirements.txt`
+1. Set the required environment variables in a `.env` file with the keys mentioned above.
+1. Install `tmux` to keep the application running after logging out of the instance.
+1. Start a new `tmux` session using `tmux new -s session_one`
+1. Run the FastAPI backend using `uvicorn app.backend:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 200`
+1. Detach that session and start a new `tmux` session using `tmux new -s session_two`
+1. Run the Flask frontend using `gunicorn -w 4 -b 127.0.0.1:5070 "web.frontend_app:app" --timeout 300`.   
+1. Enable port forwarding from port 80 to port 5070 using `sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 5070` or let the security group handle allow port 5070. 
+1. Access the application via the public IP address of the EC2 instance.
+Note: You can setup a domain name and SSL certificate for better security. You could use Nginx for reverse proxy and Let's Encrypt for the certificate. They require a real domain name.
+
+
 ### Why LangGraph?
 The RAG application could have been done without LangGraph. However, I chose LangGraph to understand how it works and can be used in agentic AI designs, informing my design options in the future. It also has LangSmith, which traces all activites on the application and gives insight on what is going on. See the screenshot below of the tracing of the application on LangSmith but can't be used with a free account :).    
-![LangSmith tracing of the application](images/langsmith.png)  
+![LangSmith tracing of the application](images/langsmith.png)   
+
+We can see the steps of the application and how long each step took. This is useful for debugging and optimizing the application. We can also see the inputs and outputs of each step, which is useful for understanding how the application works.
+![LangSmith tracing of the application](images/langsmith_trace.png)   
+
 There are more benefits of using LangGraph when designing more complex agentic applications and state management is important.     
 
 ### Note
