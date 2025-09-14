@@ -20,32 +20,75 @@
         <div class="logo" aria-hidden="true">◎</div>
         <h1>Ask my <span>RAG</span></h1>
       </div>
-      <p class="subtitle">Type a question and I’ll ask your FastAPI GraphQL endpoint under the hood.</p>
+      <p class="subtitle">A LangGraph RAG application exposed by a FastAPI GraphQL backend.</p>
+      <p class="subtitle">The context came from webscraping my website - www.leonardeshun.com.</p>
+      <p class="subtitle">Type a question - you can reference my website.</p>
     </header>
 
-    <section class="card">
-      <label class="label" for="q">Your question</label>
-      <textarea id="q" placeholder="e.g., What did Leonard do at Virginia Tech?"></textarea>
+    <!-- Flip container -->
+    <section class="flip-container" id="flipContainer" aria-live="polite">
+      <!-- FRONT: your existing Q&A card -->
+      <div class="card card-front" id="cardFront" aria-label="Question form">
+        <label class="label" for="q">Your question</label>
+        <textarea id="q" placeholder="e.g., Summarize Leonard’s experience at Virginia Tech."></textarea>
 
-      <div class="actions">
-        <button id="send">
-          <span class="spinner" aria-hidden="true"></span>
-          <span class="btn-text">Ask</span>
-          <kbd class="shortcut">Ctrl/⌘ + Enter</kbd>
-        </button>
-        <span id="status" class="status" role="status" aria-live="polite"></span>
+        <div class="actions actions-split">
+          <span id="status" class="status" role="status" aria-live="polite"></span>
+          <button id="send">
+            <span class="spinner" aria-hidden="true"></span>
+            <span class="btn-text">Ask</span>
+            <kbd class="shortcut">Ctrl/⌘ + Enter</kbd>
+          </button>
+        </div>
+
+        <div class="divider" role="separator"></div>
+
+        <h2 class="answer-title">Answer</h2>
+        <div id="answer" class="answer" tabindex="0">—</div>
       </div>
 
-      <div class="divider" role="separator"></div>
-
-      <h2 class="answer-title">Answer</h2>
-      <div id="answer" class="answer" tabindex="0">—</div>
+      <!-- BACK: sample description panel -->
+      <div class="card card-back" id="cardBack" aria-label="Sample description" tabindex="-1">
+        <div class="back-grid">
+          <h2 class="back-title">RAG Project Description</h2>
+          <h3 class="back-subtitle">The Indexing Process</h3>
+          <img class="hero-img" src="../static/indexing.png" alt="Abstract tech background"/>
+          <div>
+            <p class="back-lead">This project shows a <strong>LangGraph</strong> pipeline served via <strong>FastAPI + Strawberry GraphQL</strong> with vector search in <strong>Pinecone</strong>. A crawler crawls my website to get all the loadable links. Then the contents of the links are loaded and chunked for easier processing by the models. Embedding are created from the chunks and stored in Pinecone for later retrieval.</p>
+            <h4 class="back-subtitle">Try asking</h4>
+            <ol class="numbered">
+              <li>“What projects are on his website?”</li>
+              <li>“What tools does he use for data engineering?”</li>
+            </ol>
+          </div>
+          <br/>
+          <h3 class="back-subtitle">The Question-and-Answer Process</h3>
+          <img class="hero-img" src="../static/retrieval.png" alt="Abstract tech background"/>
+          <div>
+            <p class="back-lead">The question is entered into the <strong>Flask</strong> frontend application. It's sent to the <strong>FastAPI GraphQL</strong> backend which calls the function to start executing the steps of the <strong>LangGraph</strong>. An embedding is created from the question and a similarity search done in <strong>Pinecone</strong> to find semantically related text to the question.</p>
+            <p>This is the context, and it is added to the question to create a prompt for <strong>Google's Gemini Flash</strong> chat model. The answer is returned through the same pipeline and displayed on the <strong>Flask Frontend</strong> application.</p>
+            <p>This RAG application can be used for any website. Just change the website in the code on GitHub.</p>
+          </div>
+        </div>
+      </div>
     </section>
 
     <footer class="footer">
       <span>Powered by <strong>Flask</strong> · <strong>FastAPI + Strawberry GraphQL</strong> · <strong>Pinecone</strong> · <strong>LangGraph</strong></span>
+      <p>Find the complete code here - <a href="https://github.com/siliconshells/langchain_RAG" target="_blank" rel="noopener"><strong>LangChain RAG at GitHub</strong></a></p>
     </footer>
+
+    <!-- Flip button under the footer -->
+    <div class="flip-cta-wrap">
+      <button id="flipBtn" class="flip-btn" aria-pressed="false" aria-controls="flipContainer">
+        Show Project Description
+      </button>
+    </div>
   </main>
+
+
+
+
 
   <script>
     const API_PATH = "/ask"; // Flask endpoint that relays to FastAPI GraphQL
@@ -105,6 +148,25 @@
     $q.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) ask();
     });
+
+    // Flip logic
+    const flipBtn = document.getElementById("flipBtn");
+    const flipContainer = document.getElementById("flipContainer");
+    const cardBack = document.getElementById("cardBack");
+
+    function toggleFlip() {
+      const flipped = flipContainer.classList.toggle("flipped");
+      flipBtn.textContent = flipped ? "Back to Q&A" : "Show Project Description";
+      flipBtn.setAttribute("aria-pressed", String(flipped));
+      if (flipped) {
+        // focus the back card for accessibility
+        setTimeout(() => cardBack.focus(), 180);
+      } else {
+        document.getElementById("q").focus();
+      }
+    }
+
+    flipBtn.addEventListener("click", toggleFlip);
   </script>
 </body>
 </html>

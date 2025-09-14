@@ -24,7 +24,7 @@ body{
 .container{
   max-width: 1000px;
   margin: 0 auto;
-  padding: clamp(16px, 2vw, 24px);
+  padding: clamp(16px, 2vw, 12px);
   position: relative;
 }
 
@@ -73,13 +73,13 @@ textarea{
 textarea:focus{ box-shadow: var(--focus); border-color: var(--steel) }
 
 .actions{
-  display:flex; align-items:center; gap:12px; margin-top:12px; flex-wrap:wrap;
+  display:flex; justify-content: space-between; align-items:center; gap:12px; margin-top:12px; flex-wrap:wrap;
 }
 button{
-  display:inline-flex; align-items:center; gap:10px;
+  display:inline-flex; align-items:center; gap:8px;
   border:1px solid var(--steel);
   background: linear-gradient(180deg, var(--steel), var(--steel-700));
-  color:#fff; padding: 10px 14px; border-radius: 10px;
+  color:#fff; padding: 9px 10px; border-radius: 10px;
   font-weight:600; cursor:pointer; box-shadow: var(--shadow);
   transition: transform .06s ease, filter .2s ease;
 }
@@ -117,7 +117,7 @@ button:disabled{ opacity:.6; cursor:not-allowed }
 .answer{
   white-space: pre-wrap; background:#fff;
   border:1px solid var(--border); border-radius: 12px;
-  padding: 14px 16px; min-height: 86px;
+  padding: 14px 16px; min-height: 150px;
   outline:none;
 }
 .answer:focus{ box-shadow: var(--focus); border-color: var(--steel) }
@@ -152,4 +152,105 @@ button:disabled{ opacity:.6; cursor:not-allowed }
   body{ background: radial-gradient(1200px 800px at 100% -10%, #0b1320 0%, #0f172a 45%, #0b1222 100%) }
   .answer{ background: rgba(10,14,22,.6) }
   .logo{ box-shadow: 0 10px 30px rgba(0,0,0,.45) }
+}
+
+/* Layout tweak: split actions (status left, button right) */
+.actions-split{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+
+/* 3D flip container */
+.flip-container{
+  position: relative;
+  perspective: 1200px;
+  max-width: 760px;
+  margin: 0 auto;
+  min-height: 500px; /* ensures both faces fit */
+}
+.flip-container .card{
+  position: absolute; inset: 0;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  transition: transform .28s ease-in-out, opacity .28s ease-in-out;
+}
+.card-front{ transform: rotateY(0deg); }
+.card-back{
+  transform: rotateY(180deg);
+  opacity: 0;
+  max-height: 70vh;      /* cap height to 70% of viewport */
+  overflow-y: auto;      /* enable vertical scrolling */
+  padding-right: 1rem; /* space for scrollbar */
+  scrollbar-width: thin; /* Firefox */
+}
+
+/* Optional: prettier scrollbar for WebKit browsers */
+/* .card-back::-webkit-scrollbar {
+  width: 8px;
+}
+.card-back::-webkit-scrollbar-track {
+  background: transparent;
+} */
+.card-back::-webkit-scrollbar-thumb {
+  background-color: rgba(70,130,180,0.5); /* steel blue accent */
+  border-radius: 4px;
+}
+
+/* when flipped, hide front, show back */
+.flip-container.flipped .card-front{
+  transform: rotateY(-180deg);
+  opacity: 0;
+  pointer-events: none;
+}
+.flip-container.flipped .card-back{
+  transform: rotateY(0deg);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Back face content */
+.back-grid {
+  display: flex;
+  flex-direction: column;   /* stack items vertically */
+  /* gap: clamp(14px, 2.4vw, 26px); */
+  /* align-items: center;      center image horizontally */
+  /* text-align: left;         keep text aligned left */
+}
+.hero-img {
+  width: 100%;
+  max-width: 700px;
+  max-height: 600px;
+  /* object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow); */
+}
+.back-title{ margin:0 0 .4rem; color: var(--ink); align-self: center; }
+.back-lead{ color: var(--text); margin: 0 0 .8rem }
+.back-subtitle{ margin:.4rem 0 .4rem 0; color: var(--ink);}
+.bullet{ margin:.2rem 0 .6rem 1.1rem }
+.numbered{ margin:.2rem 0 .2rem 1.1rem }
+
+@media (max-width: 820px){
+  .back-grid{ grid-template-columns: 1fr; }
+  .hero-img{ max-height: 220px; }
+}
+
+/* Flip button under footer */
+.flip-cta-wrap{
+  display:flex; justify-content:center; margin: 8px 0 60px;
+}
+.flip-btn{
+  border: 1px solid #37963c; /* dark green border */
+  background: linear-gradient(180deg, #4eab52, #328636); /* green gradient */
+  color:#fff; padding: 10px 16px; border-radius: 12px;
+  font-weight: 600; cursor:pointer; box-shadow: var(--shadow);  
+  font-size:1.2rem; line-height:1.2;
+  transition: transform .06s ease, filter .2s ease;
+}
+.flip-btn:hover{ filter: brightness(1.05) }
+.flip-btn:active{ transform: translateY(1px) }
+
+/* Respect dark mode from your theme vars */
+@media (prefers-color-scheme: dark){
+  .hero-img{ border-color: rgba(106,164,207,0.28) }
 }
