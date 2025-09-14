@@ -58,7 +58,7 @@ This RAG application can be used for any website. Just change the website in the
 I may deploy this application using Docker and hosted on a cloud platform using services like Google Cloud Run or AWS Fargate to run the Docker containers soon. Another option is to use a cloud compute service like Google Compute Engine or AWS EC2 to run the application directly on a virtual machine. However, the easiest option is to deploy it on th LangChain Hub. I'll decide soon.
 
 ### Why LangGraph?
-The RAG application could have been done without LangGraph. However, I chose LangGraph to understand how it works and can be used in agentic AI designs, informing my design options in the future. It also has LangSmith, which traces all activites on the application and gives insight on what is going on. See the screenshot below of the tracing of the application on LangSmith.    
+The RAG application could have been done without LangGraph. However, I chose LangGraph to understand how it works and can be used in agentic AI designs, informing my design options in the future. It also has LangSmith, which traces all activites on the application and gives insight on what is going on. See the screenshot below of the tracing of the application on LangSmith but can't be used with a free account :).    
 ![LangSmith tracing of the application](images/langsmith.png)  
 There are more benefits of using LangGraph when designing more complex agentic applications and state management is important.     
 
