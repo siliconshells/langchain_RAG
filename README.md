@@ -1,6 +1,9 @@
 # A RAG application using LangChain
 ## RAG Project Description
-This project shows a LangGraph pipeline served with FastAPI + Strawberry GraphQL with vector search in Pinecone and displayed via a Flask frontend application.    
+This project shows a LangGraph pipeline served with FastAPI + Strawberry GraphQL with vector search in Pinecone and displayed via a Flask frontend application.
+<br>    
+Please find it hosted here: https://langgraph-rag.leonardeshun.com
+<br>
 ### A Screenshot of the Application
 ![A screenshot of the application](images/main_app.png)
 A screenshot of the application is shown above. The user enters a question in the text area and clicks the "Ask" button. The question is sent to the FastAPI backend which calls the function to start executing the steps of the LangGraph. The answer is returned through the same pipeline and displayed on the Flask Frontend application.     
@@ -8,8 +11,6 @@ A screenshot of the application is shown above. The user enters a question in th
 The RAG application uses my personal website https://www.leonardeshun.com/ as the source of information to answer questions. The website is crawled and the contents are stored in Pinecone for later retrieval.
 <br>
 
-Please find it hosted here: https://langgraph-rag.leonardeshun.com
-<br>
 ### A Screenshot of the Description Card
 ![A screenshot of the application](images/description_card.png)
 A screenshot of the description card is shown above. It describes the indexing and question-and-answer processes of the application.     
