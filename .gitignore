@@ -1,2 +1,3 @@
 .env
 misc.py
+__pycache__
