@@ -1,6 +1,6 @@
 # A RAG application using LangChain
 ## RAG Project Description
-This project shows a LangGraph pipeline served via FastAPI + Strawberry GraphQL with vector search in Pinecone and displayed via a Flask frontend application.    
+This project shows a LangGraph pipeline served with FastAPI + Strawberry GraphQL with vector search in Pinecone and displayed via a Flask frontend application.    
 ### A Screenshot of the Application
 ![A screenshot of the application](images/main_app.png)
 A screenshot of the application is shown above. The user enters a question in the text area and clicks the "Ask" button. The question is sent to the FastAPI backend which calls the function to start executing the steps of the LangGraph. The answer is returned through the same pipeline and displayed on the Flask Frontend application.     
@@ -43,19 +43,24 @@ This RAG application can be used for any website. Just change the website in the
 
 ### To run the application
 1. Clone the repository
-2. Create a virtual environment and activate it
-3. Install the required packages using `pip install -r requirements.txt`
-4. Set the required environment variables in a `.env` file:
+1. Install the required packages using `pip install -r requirements.txt`
+1. Set the required environment variables in a `.env` file:
    - GOOGLE_API_KEY=Your_Google_API_key
    - PINECONE_API_KEY=Your_Pinecone_API_key
+   - OPENAI_API_KEY=Your_OpenAI_API_key
    - LANGSMITH_API_KEY=Your_Pinecone_environment
    - LANGSMITH_TRACING=true
-5. Run the FastAPI backend using `uvicorn app.backend:app --host 0.0.0.0 --port 8000`
-6. Run the Flask frontend using `python web/frontend_app.py`
-7. Open your browser and go to `http://localhost:5070` to access the application
+1. Run the FastAPI backend using `uvicorn app.backend:app --host 0.0.0.0 --port 8000`
+1. Run the Flask frontend using `python web/frontend_app.py`
+1. Go to `http://localhost:5070` to access the application
 
 ### Deployment
-I will probably deploy this application using Docker and hosted on a cloud platform using services like Google Cloud Run or AWS Fargate to run the Docker containers soon. Another option is to use a cloud compute service like Google Compute Engine or AWS EC2 to run the application directly on a virtual machine.
+I may deploy this application using Docker and hosted on a cloud platform using services like Google Cloud Run or AWS Fargate to run the Docker containers soon. Another option is to use a cloud compute service like Google Compute Engine or AWS EC2 to run the application directly on a virtual machine. However, the easiest option is to deploy it on th LangChain Hub. I'll decide soon.
+
+### Why LangGraph?
+The RAG application could have been done without LangGraph. However, I chose LangGraph to understand how it works and can be used in agentic AI designs, informing my design options in the future. It also has LangSmith, which traces all activites on the application and gives insight on what is going on. See the screenshot below of the tracing of the application on LangSmith.    
+![LangSmith tracing of the application](images/langsmith.png)  
+There are more benefits of using LangGraph when designing more complex agentic applications and state management is important.     
 
 ### Note
 Make sure you have the necessary API keys and access to the services used in this project.

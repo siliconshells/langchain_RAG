@@ -1,3 +1,8 @@
 fastapi
 uvicorn[standard]
 strawberry-graphql
+langchain-text-splitters
+langchain-community
+langgraph
+langchain-openai
+langchain-pinecone
