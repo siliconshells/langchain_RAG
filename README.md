@@ -40,6 +40,8 @@ This RAG application can be used for any website. Just change the website in the
 - Python
 - HTML/CSS/JavaScript
 - OpenAI's text-embedding-3-large model
+- BeautifulSoup
+- Python-dotenv
 
 ### To run the application
 1. Clone the repository
@@ -64,3 +66,10 @@ There are more benefits of using LangGraph when designing more complex agentic a
 
 ### Note
 You'll need the necessary API keys and access to the services used in this project in your environment to run it.
+I recommend using a virtual environment for better dependency management. The process is:
+```
+python3.13 -m venv .venv
+source .venv/bin/activate
+pip install -U pip
+pip install -r requirements.txt
+```

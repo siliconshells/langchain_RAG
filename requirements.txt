@@ -7,3 +7,4 @@ langgraph
 langchain-openai
 langchain-pinecone
 python-dotenv
+beautifulsoup4
