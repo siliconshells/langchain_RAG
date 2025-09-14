@@ -61,6 +61,7 @@ I deployed it on AWS EC2 and will be deploying on Google Cloud soon. The steps t
 1. Enable port forwarding from port 80 to port 5070 using `sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 5070` or let the security group handle allow port 5070. 
 1. Access the application via the public IP address of the EC2 instance.
 Note: You can setup a domain name and SSL certificate for better security. You could use Nginx for reverse proxy and Let's Encrypt for the certificate. They require a real domain name.
+![Hosting Shot](images/host-shot.png)
 
 
 ### Why LangGraph?
