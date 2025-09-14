@@ -28,3 +28,34 @@ The question is entered into the Flask frontend application. It's sent to the Fa
 This is the context, and it is added to the question to create a prompt for Google's Gemini Flash chat model to generate the answers. The answer is returned through the same pipeline and displayed on the Flask Frontend application.     
 <br>
 This RAG application can be used for any website. Just change the website in the code on GitHub.
+
+### Technologies Used
+- LangChain
+- LangGraph
+- FastAPI
+- Strawberry GraphQL
+- Flask
+- Pinecone
+- Google Gemini Flash 2.5 model
+- Python
+- HTML/CSS/JavaScript
+- OpenAI's text-embedding-3-large model
+
+### To run the application
+1. Clone the repository
+2. Create a virtual environment and activate it
+3. Install the required packages using `pip install -r requirements.txt`
+4. Set the required environment variables in a `.env` file:
+   - GOOGLE_API_KEY=Your_Google_API_key
+   - PINECONE_API_KEY=Your_Pinecone_API_key
+   - LANGSMITH_API_KEY=Your_Pinecone_environment
+   - LANGSMITH_TRACING=true
+5. Run the FastAPI backend using `uvicorn app.backend:app --host 0.0.0.0 --port 8000`
+6. Run the Flask frontend using `python web/frontend_app.py`
+7. Open your browser and go to `http://localhost:5070` to access the application
+
+### Deployment
+I will probably deploy this application using Docker and host it on a cloud platform using services like Google Cloud Run or AWS Fargate to run the Docker containers. like AWS soon. Another option is to use a cloud compute service like Google Compute Engine or AWS EC2 to run the application directly on a virtual machine.
+
+### Note
+Make sure you have the necessary API keys and access to the services used in this project.
