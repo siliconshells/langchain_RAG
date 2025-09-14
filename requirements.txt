@@ -6,3 +6,4 @@ langchain-community
 langgraph
 langchain-openai
 langchain-pinecone
+python-dotenv

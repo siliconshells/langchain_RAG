@@ -63,4 +63,4 @@ The RAG application could have been done without LangGraph. However, I chose Lan
 There are more benefits of using LangGraph when designing more complex agentic applications and state management is important.     
 
 ### Note
-Make sure you have the necessary API keys and access to the services used in this project.
+You'll need the necessary API keys and access to the services used in this project in your environment to run it.
