@@ -55,7 +55,7 @@ This RAG application can be used for any website. Just change the website in the
 7. Open your browser and go to `http://localhost:5070` to access the application
 
 ### Deployment
-I will probably deploy this application using Docker and host it on a cloud platform using services like Google Cloud Run or AWS Fargate to run the Docker containers. like AWS soon. Another option is to use a cloud compute service like Google Compute Engine or AWS EC2 to run the application directly on a virtual machine.
+I will probably deploy this application using Docker and hosted on a cloud platform using services like Google Cloud Run or AWS Fargate to run the Docker containers soon. Another option is to use a cloud compute service like Google Compute Engine or AWS EC2 to run the application directly on a virtual machine.
 
 ### Note
 Make sure you have the necessary API keys and access to the services used in this project.
