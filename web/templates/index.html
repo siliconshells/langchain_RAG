@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Ask my RAG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <!-- Decorative background pattern -->
+  <div class="bg-layer bg-grid"></div>
+  <div class="bg-layer bg-glow"></div>
+
+  <main class="container">
+    <header class="header">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">◎</div>
+        <h1>Ask my <span>RAG</span></h1>
+      </div>
+      <p class="subtitle">Type a question and I’ll ask your FastAPI GraphQL endpoint under the hood.</p>
+    </header>
+
+    <section class="card">
+      <label class="label" for="q">Your question</label>
+      <textarea id="q" placeholder="e.g., What did Leonard do at Virginia Tech?"></textarea>
+
+      <div class="actions">
+        <button id="send">
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="btn-text">Ask</span>
+          <kbd class="shortcut">Ctrl/⌘ + Enter</kbd>
+        </button>
+        <span id="status" class="status" role="status" aria-live="polite"></span>
+      </div>
+
+      <div class="divider" role="separator"></div>
+
+      <h2 class="answer-title">Answer</h2>
+      <div id="answer" class="answer" tabindex="0">—</div>
+    </section>
+
+    <footer class="footer">
+      <span>Powered by <strong>Flask</strong> · <strong>FastAPI + Strawberry GraphQL</strong> · <strong>Pinecone</strong> · <strong>LangGraph</strong></span>
+    </footer>
+  </main>
+
+  <script>
+    const API_PATH = "/ask"; // Flask endpoint that relays to FastAPI GraphQL
+
+    const $q = document.getElementById("q");
+    const $send = document.getElementById("send");
+    const $answer = document.getElementById("answer");
+    const $status = document.getElementById("status");
+    const $spinner = $send.querySelector(".spinner");
+    const $btnText = $send.querySelector(".btn-text");
+
+    function setLoading(loading) {
+      if (loading) {
+        $send.disabled = true;
+        $spinner.style.opacity = "1";
+        $btnText.textContent = "Asking…";
+        $status.textContent = "Contacting server…";
+      } else {
+        $send.disabled = false;
+        $spinner.style.opacity = "0";
+        $btnText.textContent = "Ask";
+      }
+    }
+
+    async function ask() {
+      const question = $q.value.trim();
+      if (!question) {
+        $status.textContent = "Please enter a question.";
+        $answer.textContent = "—";
+        return;
+      }
+      setLoading(true);
+      $answer.textContent = "—";
+
+      try {
+        const res = await fetch(API_PATH, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error || res.statusText);
+
+        $answer.textContent = data.answer ?? "(no answer)";
+        $status.textContent = "Done";
+        $answer.focus();
+      } catch (err) {
+        $answer.textContent = "Error: " + (err?.message || err);
+        $status.textContent = "Failed";
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    document.getElementById("send").addEventListener("click", ask);
+    $q.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) ask();
+    });
+  </script>
+</body>
+</html>
