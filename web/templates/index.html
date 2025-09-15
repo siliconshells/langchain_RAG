@@ -22,14 +22,13 @@
       </div>
       <p class="subtitle">A LangGraph RAG application exposed by a FastAPI GraphQL backend.</p>
       <p class="subtitle">The context came from webscraping my website - www.leonardeshun.com.</p>
-      <p class="subtitle">Type a question - you can reference my website.</p>
     </header>
 
     <!-- Flip container -->
     <section class="flip-container" id="flipContainer" aria-live="polite">
       <!-- FRONT: your existing Q&A card -->
       <div class="card card-front" id="cardFront" aria-label="Question form">
-        <label class="label" for="q">Your question</label>
+        <label class="label" for="q">Your question - you can reference my website</label>
         <textarea id="q" placeholder="e.g., Summarize Leonard’s experience at Virginia Tech."></textarea>
 
         <div class="actions actions-split">
@@ -45,6 +44,7 @@
 
         <h2 class="answer-title">Answer</h2>
         <div id="answer" class="answer" tabindex="0">—</div>
+        <span class="footerdata">If a request times out, please try again. The free Gemini use-rate is throttled.</span>
       </div>
 
       <!-- BACK: description panel -->

@@ -18,7 +18,7 @@ A screenshot of the description card is shown above. It describes the indexing a
 
 ### The Indexing Process
 ![Abstract tech background](images/indexing.png)
-A crawler crawls my website to get all the loadable links. Then the contents of the links are loaded and chunked for easier processing by the models. Embedding are created from the chunks and stored in Pinecone for later retrieval.
+A crawler crawls my website to get all loadable links. Then the contents of the links are loaded and chunked for easier processing by the models. Embedding are created from the chunks and stored in Pinecone for later retrieval.
 
 ### Try asking
 1. “What projects are on his website?”    
@@ -28,7 +28,7 @@ A crawler crawls my website to get all the loadable links. Then the contents of 
 ![Abstract tech background](images/retrieval.png)
 The question is entered into the Flask frontend application. It's sent to the FastAPI GraphQL backend which calls the function to start executing the steps of the LangGraph. An embedding is created from the question and a similarity search done in Pinecone to find semantically related text to the question.      
 <br>
-This is the context, and it is added to the question to create a prompt for Google's Gemini Flash chat model to generate the answers. The answer is returned through the same pipeline and displayed on the Flask Frontend application.     
+This context is added to the question to create a prompt for Google's Gemini Flash chat model to generate the answers. The answer is returned through the same pipeline and displayed on the Flask Frontend application.     
 <br>
 This RAG application can be used for any website. Just change the website in the code on GitHub.
 
