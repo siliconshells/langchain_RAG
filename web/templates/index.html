@@ -8,47 +8,73 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-  <!-- Decorative background pattern -->
   <div class="bg-layer bg-grid"></div>
   <div class="bg-layer bg-glow"></div>
 
   <main class="container">
-    <header class="header">
-      <div class="brand">
-        <div class="logo" aria-hidden="true">◎</div>
-        <h1>Ask my <span>RAG</span></h1>
+    <div class="left-col">
+      <header class="header">
+        <div class="brand">
+          <div class="logo" aria-hidden="true">◎</div>
+          <h1>Ask my <span>RAG</span></h1>
+        </div>
+        <p class="subtitle">A LangGraph RAG application exposed by a FastAPI GraphQL backend.</p>
+        <p class="subtitle">The context came from webscraping my website - www.leonardeshun.com.</p>
+      </header>
+
+      <footer class="footer">
+        <span>Powered by</span><br>
+        <span><strong>Flask</strong> · <strong>FastAPI + GraphQL</strong> · <strong>Pinecone</strong> · <strong>LangGraph</strong></span>
+        <p>Find the code here: <a href="https://github.com/siliconshells/langchain_RAG" target="_blank" rel="noopener"><strong>LangChain RAG at GitHub</strong></a></p>
+      </footer>
+
+      <div class="flip-cta-wrap">
+        <button type="button" id="flipBtn" class="flip-btn" aria-pressed="false" aria-controls="flipContainer">
+          Show Project Description
+        </button>
       </div>
-      <p class="subtitle">A LangGraph RAG application exposed by a FastAPI GraphQL backend.</p>
-      <p class="subtitle">The context came from webscraping my website - www.leonardeshun.com.</p>
-    </header>
+    </div>
 
-    <!-- Flip container -->
     <section class="flip-container" id="flipContainer" aria-live="polite">
-      <!-- FRONT: your existing Q&A card -->
-      <div class="card card-front" id="cardFront" aria-label="Question form">
-        <label class="label" for="q">Your question - you can reference my website</label>
-        <textarea id="q" placeholder="e.g., Summarize Leonard’s experience at Virginia Tech."></textarea>
 
-        <div class="actions actions-split">
-          <span id="status" class="status" role="status" aria-live="polite"></span>
-          <button id="send">
-            <span class="spinner" aria-hidden="true"></span>
-            <span class="btn-text">Ask</span>
-            <kbd class="shortcut">Ctrl/⌘ + Enter</kbd>
-          </button>
+      <!-- FRONT: chat interface -->
+      <div class="card card-front" id="cardFront" aria-label="Chat interface">
+        <div class="chat-header">
+          <span class="label">Ask me anything about Leonard</span>
+          <button type="button" id="clearBtn" class="clear-btn" title="Clear conversation">Clear</button>
         </div>
 
-        <div class="divider" role="separator"></div>
+        <div class="chat-window" id="chatWindow" role="log" aria-label="Chat messages" aria-live="polite">
+          <div class="empty-state">
+            <p>Start a conversation. Try asking:</p>
+            <ul>
+              <li>"What certifications does he have?"</li>
+              <li>"What tools does he use for AI engineering?"</li>
+              <li>"What projects are on his website?"</li>
+            </ul>
+          </div>
+        </div>
 
-        <h2 class="answer-title">Answer</h2>
-        <div id="answer" class="answer" tabindex="0">—</div>
-        <span class="footerdata">If a request times out, please try again. The free Gemini use-rate is throttled.</span>
+        <div class="chat-input-bar">
+          <div class="input-row">
+            <textarea id="q" placeholder="Type your question…" rows="1" aria-label="Your question"></textarea>
+            <button type="button" id="send" aria-label="Send message">
+              <span class="spinner" aria-hidden="true"></span>
+              <span class="btn-text">Send</span>
+              <kbd class="shortcut">⌘↵</kbd>
+            </button>
+          </div>
+          <div class="input-footer">
+            <span id="status" class="status" role="status" aria-live="polite"></span>
+          </div>
+        </div>
       </div>
 
       <!-- BACK: description panel -->
-      <div class="card card-back" id="cardBack" aria-label="Sample description" tabindex="-1">
+      <div class="card card-back" id="cardBack" aria-label="Project description" tabindex="-1">
         <div class="back-grid">
           <h2 class="back-title">RAG Project Description</h2>
           <h3 class="back-subtitle">The Indexing Process</h3>
@@ -57,8 +83,8 @@
             <p class="back-lead">This project shows a <strong>LangGraph</strong> pipeline served via <strong>FastAPI + Strawberry GraphQL</strong> with vector search in <strong>Pinecone</strong>. A crawler crawls my website to get all the loadable links. Then the contents of the links are loaded and chunked for easier processing by the models. Embeddings are created from the chunks and stored in Pinecone for later retrieval.</p>
             <h4 class="back-subtitle">Try asking</h4>
             <ol class="numbered">
-              <li>“What projects are on his website?”</li>
-              <li>“What tools does he use for data engineering?”</li>
+              <li>"What projects are on his website?"</li>
+              <li>"What tools does he use for data engineering?"</li>
             </ol>
           </div>
           <br/>
@@ -73,100 +99,144 @@
       </div>
     </section>
 
-    <footer class="footer">
-      <span>Powered by <strong>Flask</strong> · <strong>FastAPI + Strawberry GraphQL</strong> · <strong>Pinecone</strong> · <strong>LangGraph</strong></span>
-      <p>Find the complete code here - <a href="https://github.com/siliconshells/langchain_RAG" target="_blank" rel="noopener"><strong>LangChain RAG at GitHub</strong></a></p>
-    </footer>
-
-    <!-- Flip button under the footer -->
-    <div class="flip-cta-wrap">
-      <button id="flipBtn" class="flip-btn" aria-pressed="false" aria-controls="flipContainer">
-        Show Project Description
-      </button>
-    </div>
   </main>
 
-
-
-
-
   <script>
-    const API_PATH = "/ask"; // Flask endpoint that relays to FastAPI GraphQL
+    const API_PATH = "/ask";
 
-    const $q = document.getElementById("q");
-    const $send = document.getElementById("send");
-    const $answer = document.getElementById("answer");
-    const $status = document.getElementById("status");
-    const $spinner = $send.querySelector(".spinner");
-    const $btnText = $send.querySelector(".btn-text");
+    const $q        = document.getElementById("q");
+    const $send     = document.getElementById("send");
+    const $status   = document.getElementById("status");
+    const $spinner  = $send.querySelector(".spinner");
+    const $btnText  = $send.querySelector(".btn-text");
+    const chatWindow = document.getElementById("chatWindow");
+    const clearBtn  = document.getElementById("clearBtn");
 
-    function setLoading(loading) {
-      if (loading) {
-        $send.disabled = true;
-        $spinner.style.opacity = "1";
-        $btnText.textContent = "Asking…";
-        $status.textContent = "Contacting server…";
+    // Full conversation history sent to the backend on each turn.
+    let messages = []; // [{role: "human"|"ai", content: string}]
+
+    // Auto-grow textarea up to ~4 lines.
+    $q.addEventListener("input", () => {
+      $q.style.height = "auto";
+      $q.style.height = Math.min($q.scrollHeight, 120) + "px";
+    });
+
+    function setLoading(on) {
+      $send.disabled = on;
+      $spinner.style.opacity = on ? "1" : "0";
+      $btnText.textContent = on ? "…" : "Send";
+      $status.textContent  = on ? "Thinking…" : "";
+    }
+
+    function removeEmptyState() {
+      const el = chatWindow.querySelector(".empty-state");
+      if (el) el.remove();
+    }
+
+    function appendBubble(role, content) {
+      removeEmptyState();
+      const wrapper = document.createElement("div");
+      wrapper.className = `msg-wrapper msg-wrapper--${role === "human" ? "user" : "ai"}`;
+      const bubble = document.createElement("div");
+      bubble.className = `msg msg-${role === "human" ? "user" : "ai"}`;
+      if (role === "human") {
+        bubble.textContent = content;
       } else {
-        $send.disabled = false;
-        $spinner.style.opacity = "0";
-        $btnText.textContent = "Ask";
+        bubble.innerHTML = marked.parse(content);
       }
+      wrapper.appendChild(bubble);
+      chatWindow.appendChild(wrapper);
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    function appendTyping() {
+      removeEmptyState();
+      const wrapper = document.createElement("div");
+      wrapper.className = "msg-wrapper msg-wrapper--ai";
+      wrapper.id = "typingIndicator";
+      const bubble = document.createElement("div");
+      bubble.className = "msg msg-ai msg-typing";
+      bubble.innerHTML = "<span></span><span></span><span></span>";
+      wrapper.appendChild(bubble);
+      chatWindow.appendChild(wrapper);
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    function removeTyping() {
+      const el = document.getElementById("typingIndicator");
+      if (el) el.remove();
     }
 
     async function ask() {
       const question = $q.value.trim();
-      if (!question) {
-        $status.textContent = "Please enter a question.";
-        $answer.textContent = "—";
-        return;
-      }
+      if (!question) return;
+
+      // Snapshot history before this turn, then add user message.
+      const historyToSend = [...messages];
+      messages.push({ role: "human", content: question });
+      appendBubble("human", question);
+      $q.value = "";
+      $q.style.height = "auto";
       setLoading(true);
-      $answer.textContent = "—";
+      appendTyping();
 
       try {
         const res = await fetch(API_PATH, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ question })
+          body: JSON.stringify({ question, chatHistory: historyToSend }),
         });
 
         const data = await res.json().catch(() => ({}));
+        removeTyping();
+
         if (!res.ok) throw new Error(data?.error || res.statusText);
 
-        $answer.textContent = data.answer ?? "(no answer)";
-        $status.textContent = "Done";
-        $answer.focus();
+        const answer = data.answer ?? "(no answer)";
+        messages.push({ role: "ai", content: answer });
+        appendBubble("ai", answer);
       } catch (err) {
-        $answer.textContent = "Error: " + (err?.message || err);
+        removeTyping();
+        messages.pop(); // drop the user turn so history stays clean
+        appendBubble("ai", "Error: " + (err?.message || String(err)));
         $status.textContent = "Failed";
       } finally {
         setLoading(false);
+        $q.focus();
       }
     }
 
-    document.getElementById("send").addEventListener("click", ask);
+    clearBtn.addEventListener("click", () => {
+      messages = [];
+      chatWindow.innerHTML = `<div class="empty-state">
+        <p>Start a conversation. Try asking:</p>
+        <ul>
+          <li>"What certifications does he have?"</li>
+          <li>"What tools does he use for AI engineering?"</li>
+          <li>"What projects are on his website?"</li>
+        </ul>
+      </div>`;
+      $status.textContent = "";
+      $q.focus();
+    });
+
+    $send.addEventListener("click", ask);
     $q.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) ask();
     });
 
     // Flip logic
-    const flipBtn = document.getElementById("flipBtn");
+    const flipBtn       = document.getElementById("flipBtn");
     const flipContainer = document.getElementById("flipContainer");
-    const cardBack = document.getElementById("cardBack");
+    const cardBack      = document.getElementById("cardBack");
 
-    function toggleFlip() {
+    flipBtn.addEventListener("click", () => {
       const flipped = flipContainer.classList.toggle("flipped");
-      flipBtn.textContent = flipped ? "Back to Q&A" : "Show Project Description";
+      flipBtn.textContent = flipped ? "Back to Chat" : "Show Project Description";
       flipBtn.setAttribute("aria-pressed", String(flipped));
-      if (flipped) {
-        // focus the back card for accessibility
-        setTimeout(() => cardBack.focus(), 180);
-      } else {
-        document.getElementById("q").focus();
-      }
-    }
-
-    flipBtn.addEventListener("click", toggleFlip);
+      if (flipped) setTimeout(() => cardBack.focus(), 180);
+      else $q.focus();
+    });
   </script>
 </body>
 </html>

@@ -1,57 +1,47 @@
-from app.crawler import discover_site_urls
-
+import logging
 import os
-import warnings
 
-warnings.filterwarnings(
-    "ignore",
-    message=".*LangChain uses pydantic v2 internally.*",
-    category=DeprecationWarning,
-)
-# To let servers know who is calling them
-os.environ["USER_AGENT"] = "my-rag-application/0.1 (contact: Leonard Eshun)"
-
-
-from langchain import hub
-from langchain_community.document_loaders import WebBaseLoader
-from langchain_core.documents import Document
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langgraph.graph import START, StateGraph
-from typing_extensions import List, TypedDict
 from dotenv import load_dotenv
+from google.api_core.exceptions import ResourceExhausted
+from langchain.chains import create_history_aware_retriever, create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chat_models import init_chat_model
+from langchain_community.document_loaders import WebBaseLoader
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pinecone import Pinecone, ServerlessSpec
-from langchain.chat_models import init_chat_model
 
+from .crawler import discover_site_urls
 
-# Load variables from .env into os.environ
+logger = logging.getLogger(__name__)
+
+os.environ["USER_AGENT"] = "my-rag-application/0.1 (contact: Leonard Eshun)"
+
 load_dotenv()
 
-# Initialize the Gemini 2.5 model from Google GenAI for chat model
 chat_model = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
-
-# Initialize OpenAI embeddings for creating embeddings
 embeddings_model = OpenAIEmbeddings(model="text-embedding-3-large")
 
-# Initialize Pinecone vector store for storing and retrieving embeddings
 index_name = "langchain-rag-3072-full"
 pc = Pinecone(api_key=os.environ.get("PINECONE_API_KEY"))
 
+_rag_chain = None
+
 
 def setup_pinecone_with_external_data():
-    print("Setting up Pinecone with external data...")
+    logger.info("Setting up Pinecone with external data...")
     pc.create_index(
         name=index_name,
-        dimension=3072,  # embedding size for text-embedding-3-large
-        metric="cosine",  # or "dotproduct"/"euclidean"
+        dimension=3072,
+        metric="cosine",
         spec=ServerlessSpec(cloud="aws", region="us-east-1"),
     )
 
     index = pc.Index(name=index_name)
     vector_store = PineconeVectorStore(embedding=embeddings_model, index=index)
 
-    # Get the URLs by crawling my personal website
     urls = discover_site_urls(
         "https://leonardeshun.com/",
         max_pages=15,
@@ -61,70 +51,83 @@ def setup_pinecone_with_external_data():
         deny_paths=["/admin", "/login"],
     )
 
-    # Load and chunk contents of my website
     if not urls:
-        print("No URLs found to crawl.")
+        logger.warning("No URLs found to crawl.")
         return
 
     for url in urls:
         loader = WebBaseLoader(url)
         docs = loader.load()
-
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000, chunk_overlap=200
         )
         all_splits = text_splitter.split_documents(docs)
-
-        # Index chunks
         _ = vector_store.add_documents(documents=all_splits)
 
 
-# Define prompt for question-answering
-prompt = hub.pull("rlm/rag-prompt")
+# Reformulates follow-up questions into standalone questions so the retriever
+# gets a self-contained query regardless of what came before in the conversation.
+_contextualize_q_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            "Given a chat history and the latest user question which might reference context "
+            "in the chat history, formulate a standalone question which can be understood "
+            "without the chat history. Do NOT answer the question, just reformulate it if "
+            "needed and otherwise return it as is.",
+        ),
+        MessagesPlaceholder("chat_history"),
+        ("human", "{input}"),
+    ]
+)
+
+_qa_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            "You are an assistant for question-answering tasks about Leonard Eshun. "
+            "Use the following pieces of retrieved context to answer the question. "
+            "If you don't know the answer, say that you don't know. "
+            "Keep the answer concise and informative.\n\n{context}",
+        ),
+        MessagesPlaceholder("chat_history"),
+        ("human", "{input}"),
+    ]
+)
 
 
-# Define state for application
-class State(TypedDict):
-    question: str
-    context: List[Document]
-    answer: str
+def _get_rag_chain():
+    global _rag_chain
+    if _rag_chain is not None:
+        return _rag_chain
 
+    if not pc.has_index(index_name):
+        setup_pinecone_with_external_data()
 
-# Define application steps
-def retrieve(state: State):
     index = pc.Index(name=index_name)
     vector_store = PineconeVectorStore(embedding=embeddings_model, index=index)
-    retrieved_docs = vector_store.similarity_search(state["question"], k=20)
-    return {"context": retrieved_docs}
+    retriever = vector_store.as_retriever(search_kwargs={"k": 20})
 
-
-def generate(state: State):
-    docs_content = "\n\n".join(doc.page_content for doc in state["context"])
-    messages = prompt.invoke({"question": state["question"], "context": docs_content})
-    response = chat_model.invoke(messages)
-    return {"answer": response.content}
-
-
-def retrieve_generate(question: str) -> str:
-    if not pc.has_index(index_name):
-        setup_pinecone_with_external_data()
-    graph_builder = StateGraph(State).add_sequence([retrieve, generate])
-    graph_builder.add_edge(START, "retrieve")
-    graph = graph_builder.compile()
-    response = graph.invoke({"question": question})
-    return response["answer"]
-
-
-# Test the application with a sample question
-if __name__ == "__main__":
-    if not pc.has_index(index_name):
-        setup_pinecone_with_external_data()
-    graph_builder = StateGraph(State).add_sequence([retrieve, generate])
-    graph_builder.add_edge(START, "retrieve")
-    graph = graph_builder.compile()
-    question = "What did Leonard do at virginia tech?"
-    print(
-        f"*********************** Answering the question - {question} ***********************"
+    history_aware_retriever = create_history_aware_retriever(
+        chat_model, retriever, _contextualize_q_prompt
     )
-    response = graph.invoke({"question": question})
-    print(response["answer"])
+    question_answer_chain = create_stuff_documents_chain(chat_model, _qa_prompt)
+    _rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
+    return _rag_chain
+
+
+def retrieve_generate(question: str, chat_history: list | None = None) -> str:
+    if chat_history is None:
+        chat_history = []
+
+    try:
+        result = _get_rag_chain().invoke(
+            {"input": question, "chat_history": chat_history}
+        )
+        return result["answer"]
+    except ResourceExhausted:
+        return "The AI model is rate-limited (free tier quota exceeded). Please wait about 30 seconds and try again."
+
+
+if __name__ == "__main__":
+    print(retrieve_generate("What did Leonard do at Virginia Tech?"))

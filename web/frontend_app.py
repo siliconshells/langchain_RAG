@@ -1,11 +1,8 @@
 import os
-from flask import Flask, jsonify, render_template, request
-import requests
 
-# Point this to your FastAPI GraphQL endpoint (the Strawberry router prefix)
-# Examples:
-#   http://localhost:8000/greetings
-#   https://your.domain/greetings
+import requests
+from flask import Flask, jsonify, render_template, request
+
 FASTAPI_GRAPHQL_URL = os.getenv(
     "FASTAPI_GRAPHQL_URL", "http://localhost:8000/v1/graphql"
 )
@@ -22,20 +19,26 @@ def index():
 def ask():
     data = request.get_json(silent=True) or {}
     question = (data.get("question") or "").strip()
+    chat_history = data.get("chatHistory") or []
+
     if not question:
         return jsonify({"error": "Missing 'question'"}), 400
 
-    # GraphQL payload to call your field: askAQuestion(question: String!): String
     payload = {
-        "query": "query($q:String!){ askAQuestion(question:$q) }",
-        "variables": {"q": question},
+        "query": """query($q: String!, $h: [ChatMessageInput!]) {
+            askAQuestion(question: $q, chatHistory: $h)
+        }""",
+        "variables": {
+            "q": question,
+            "h": [{"role": m["role"], "content": m["content"]} for m in chat_history],
+        },
     }
 
     try:
         resp = requests.post(
             FASTAPI_GRAPHQL_URL,
             json=payload,
-            timeout=30,
+            timeout=120,
             headers={
                 "Content-Type": "application/json",
                 "User-Agent": "flask-frontend/1.0",
@@ -45,7 +48,6 @@ def ask():
         body = resp.json()
 
         if "errors" in body:
-            # Surface GraphQL errors nicely
             return jsonify({"error": body["errors"]}), 502
 
         answer = body.get("data", {}).get("askAQuestion")
@@ -55,5 +57,4 @@ def ask():
 
 
 if __name__ == "__main__":
-    # Run Flask dev server
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", "5070")), debug=True)

@@ -1,11 +1,14 @@
-import time
+import logging
 import re
+import time
+import urllib.robotparser as robotparser
 from collections import deque
 from urllib.parse import urljoin, urlparse, urlunparse
 
 import requests
 from bs4 import BeautifulSoup
-import urllib.robotparser as robotparser
+
+logger = logging.getLogger(__name__)
 
 
 def _normalize_url(base_url: str, href: str) -> str | None:
@@ -71,14 +74,12 @@ def discover_site_urls(
     root = f"{start_parsed.scheme}://{start_parsed.netloc}"
     root_netloc = start_parsed.netloc
 
-    # robots.txt
     rp = robotparser.RobotFileParser()
     rp.set_url(urljoin(root, "/robots.txt"))
     try:
         rp.read()
     except Exception:
-        # If robots cannot be read, default to permissive (common practice, but you may choose to be strict)
-        pass
+        logger.debug("Could not fetch robots.txt for %s — proceeding without it.", root)
 
     headers = {"User-Agent": user_agent}
     seen: set[str] = set()
@@ -91,16 +92,12 @@ def discover_site_urls(
             continue
         seen.add(url)
 
-        # robots allow?
         try:
             if not rp.can_fetch(user_agent, url):
-                # Skip disallowed by robots
                 continue
         except Exception:
-            # If rp failed to load, proceed (or set to continue to be conservative)
-            pass
+            logger.debug("robots.txt check failed for %s — allowing.", url)
 
-        # path allow/deny filters
         path = urlparse(url).path or "/"
         if allow_paths and not any(path.startswith(p) for p in allow_paths):
             continue
