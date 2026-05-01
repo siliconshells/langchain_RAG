@@ -255,6 +255,7 @@
       let recognition = null;
       let listening = false;
       let baseValue = "";
+      let gotFinalResult = false;
 
       $mic.addEventListener("click", () => {
         if (listening) {
@@ -268,6 +269,7 @@
         recognition.continuous = false;
 
         baseValue = $q.value.trim();
+        gotFinalResult = false;
 
         recognition.onstart = () => {
           listening = true;
@@ -280,6 +282,7 @@
           let transcript = "";
           for (let i = 0; i < event.results.length; i++) {
             transcript += event.results[i][0].transcript;
+            if (event.results[i].isFinal) gotFinalResult = true;
           }
           $q.value = baseValue ? baseValue + " " + transcript : transcript;
           $q.style.height = "auto";
@@ -295,7 +298,11 @@
           $mic.classList.remove("recording");
           $mic.setAttribute("aria-pressed", "false");
           if ($status.textContent === "Listening…") $status.textContent = "";
-          $q.focus();
+          if (gotFinalResult && $q.value.trim()) {
+            ask();
+          } else {
+            $q.focus();
+          }
         };
 
         try {
