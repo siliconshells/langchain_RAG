@@ -61,6 +61,13 @@
         <div class="chat-input-bar">
           <div class="input-row">
             <textarea id="q" placeholder="Type your question…" rows="1" aria-label="Your question"></textarea>
+            <button type="button" id="mic" class="mic-btn" aria-label="Speak your question" aria-pressed="false" title="Voice input">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="9" y="2" width="6" height="12" rx="3"/>
+                <path d="M5 10v2a7 7 0 0 0 14 0v-2"/>
+                <line x1="12" y1="19" x2="12" y2="22"/>
+              </svg>
+            </button>
             <button type="button" id="send" aria-label="Send message">
               <span class="spinner" aria-hidden="true"></span>
               <span class="btn-text">Send</span>
@@ -237,6 +244,67 @@
       if (flipped) setTimeout(() => cardBack.focus(), 180);
       else $q.focus();
     });
+
+    // Voice input via Web Speech API
+    const $mic = document.getElementById("mic");
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SR) {
+      $mic.style.display = "none";
+    } else {
+      let recognition = null;
+      let listening = false;
+      let baseValue = "";
+
+      $mic.addEventListener("click", () => {
+        if (listening) {
+          recognition.stop();
+          return;
+        }
+
+        recognition = new SR();
+        recognition.lang = "en-US";
+        recognition.interimResults = true;
+        recognition.continuous = false;
+
+        baseValue = $q.value.trim();
+
+        recognition.onstart = () => {
+          listening = true;
+          $mic.classList.add("recording");
+          $mic.setAttribute("aria-pressed", "true");
+          $status.textContent = "Listening…";
+        };
+
+        recognition.onresult = (event) => {
+          let transcript = "";
+          for (let i = 0; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+          }
+          $q.value = baseValue ? baseValue + " " + transcript : transcript;
+          $q.style.height = "auto";
+          $q.style.height = Math.min($q.scrollHeight, 120) + "px";
+        };
+
+        recognition.onerror = (event) => {
+          $status.textContent = "Mic error: " + event.error;
+        };
+
+        recognition.onend = () => {
+          listening = false;
+          $mic.classList.remove("recording");
+          $mic.setAttribute("aria-pressed", "false");
+          if ($status.textContent === "Listening…") $status.textContent = "";
+          $q.focus();
+        };
+
+        try {
+          recognition.start();
+        } catch (err) {
+          $status.textContent = "Mic error: " + err.message;
+        }
+      });
+    }
   </script>
 </body>
 </html>
