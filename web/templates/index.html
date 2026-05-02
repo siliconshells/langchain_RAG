@@ -21,13 +21,13 @@
           <div class="logo" aria-hidden="true">◎</div>
           <h1>Ask my <span>RAG</span></h1>
         </div>
-        <p class="subtitle">A LangGraph RAG application exposed by a FastAPI GraphQL backend.</p>
+        <p class="subtitle">A LangChain RAG application exposed by a FastAPI GraphQL backend.</p>
         <p class="subtitle">The context came from webscraping my website - www.leonardeshun.com.</p>
       </header>
 
       <footer class="footer">
         <span>Powered by</span><br>
-        <span><strong>Flask</strong> · <strong>FastAPI + GraphQL</strong> · <strong>Pinecone</strong> · <strong>LangGraph</strong></span>
+        <span><strong>Flask</strong> · <strong>FastAPI + GraphQL</strong> · <strong>Pinecone</strong> · <strong>LangChain</strong></span>
         <p>Find the code here: <a href="https://github.com/siliconshells/langchain_RAG" target="_blank" rel="noopener"><strong>LangChain RAG at GitHub</strong></a></p>
       </footer>
 
@@ -87,7 +87,7 @@
           <h3 class="back-subtitle">The Indexing Process</h3>
           <img class="hero-img" src="../static/indexing.png" alt="Abstract tech background"/>
           <div>
-            <p class="back-lead">This project shows a <strong>LangGraph</strong> pipeline served via <strong>FastAPI + Strawberry GraphQL</strong> with vector search in <strong>Pinecone</strong>. A crawler crawls my website to get all the loadable links. Then the contents of the links are loaded and chunked for easier processing by the models. Embeddings are created from the chunks and stored in Pinecone for later retrieval.</p>
+            <p class="back-lead">This project shows a <strong>LangChain</strong> retrieval pipeline served via <strong>FastAPI + Strawberry GraphQL</strong> with vector search in <strong>Pinecone</strong>. A crawler crawls my website to get all the loadable links. Then the contents of the links are loaded and chunked for easier processing by the models. Embeddings are created from the chunks and stored in Pinecone for later retrieval.</p>
             <h4 class="back-subtitle">Try asking</h4>
             <ol class="numbered">
               <li>"What projects are on his website?"</li>
@@ -98,7 +98,7 @@
           <h3 class="back-subtitle">The Question-and-Answer Process</h3>
           <img class="hero-img" src="../static/retrieval.png" alt="Abstract tech background"/>
           <div>
-            <p class="back-lead">The question is entered into the <strong>Flask</strong> frontend application. It's sent to the <strong>FastAPI GraphQL</strong> backend which calls the function to start executing the steps of the <strong>LangGraph</strong>. An embedding is created from the question and a similarity search done in <strong>Pinecone</strong> to find semantically related text to the question.</p>
+            <p class="back-lead">The question is entered into the <strong>Flask</strong> frontend application. It's sent to the <strong>FastAPI GraphQL</strong> backend which calls the function to start executing the <strong>LangChain</strong> retrieval chain. An embedding is created from the question and a similarity search done in <strong>Pinecone</strong> to find semantically related text to the question.</p>
             <p>This is the context, and it is added to the question to create a prompt for <strong>Google's Gemini Flash</strong> chat model. The answer is returned through the same pipeline and displayed on the <strong>Flask Frontend</strong> application.</p>
             <p>This RAG application can be used for any website. Just change the website in the code on GitHub. It can also be adapted for other data sources by changing the loader.</p>
           </div>

@@ -4,7 +4,6 @@ strawberry-graphql>=0.282.0
 langchain-text-splitters>=0.3.11
 langchain-community>=0.3.29
 langchain-google-genai>=2.1.10
-langgraph>=0.6.7
 langchain-openai>=0.3.33
 langchain-pinecone>=0.2.12
 python-dotenv>=1.0.1
