@@ -1,4 +1,3 @@
-import json
 from unittest.mock import patch
 
 import pytest
@@ -54,6 +53,7 @@ class TestAskRoute:
 
     def test_backend_unreachable_returns_502(self, client):
         import requests as req
+
         with patch("web.frontend_app.requests.post", side_effect=req.ConnectionError):
             response = client.post("/ask", json={"question": "What is RAG?"})
 

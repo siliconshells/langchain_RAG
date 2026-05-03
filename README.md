@@ -2,7 +2,7 @@
 ## RAG Project Description
 This project shows a LangChain retrieval pipeline served with FastAPI + Strawberry GraphQL with vector search in Pinecone and displayed via a Flask frontend application.
 <br>    
-Please find it hosted here: https://langgraph-rag.leonardeshun.com
+Please find it hosted here: https://langchain-rag.leonardeshun.com
 <br>
 ### A Screenshot of the Application
 ![A screenshot of the application](images/main_app.png)

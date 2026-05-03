@@ -8,6 +8,7 @@ from google.api_core.exceptions import ResourceExhausted
 def reset_rag_chain():
     """Ensure the cached chain is cleared between tests."""
     import app.rag_application as rag
+
     rag._rag_chain = None
     yield
     rag._rag_chain = None
@@ -20,6 +21,7 @@ class TestRetrieveGenerate:
 
         with patch("app.rag_application._get_rag_chain", return_value=mock_chain):
             from app.rag_application import retrieve_generate
+
             result = retrieve_generate("What did Leonard work on?")
 
         assert result == "Leonard worked on data pipelines."
@@ -33,6 +35,7 @@ class TestRetrieveGenerate:
 
         with patch("app.rag_application._get_rag_chain", return_value=mock_chain):
             from app.rag_application import retrieve_generate
+
             retrieve_generate("Follow-up question", chat_history=history)
 
         call_kwargs = mock_chain.invoke.call_args[0][0]
@@ -44,6 +47,7 @@ class TestRetrieveGenerate:
 
         with patch("app.rag_application._get_rag_chain", return_value=mock_chain):
             from app.rag_application import retrieve_generate
+
             retrieve_generate("Any question")
 
         call_kwargs = mock_chain.invoke.call_args[0][0]
@@ -55,6 +59,7 @@ class TestRetrieveGenerate:
 
         with patch("app.rag_application._get_rag_chain", return_value=mock_chain):
             from app.rag_application import retrieve_generate
+
             result = retrieve_generate("Any question")
 
         assert "rate-limited" in result.lower()
@@ -65,6 +70,7 @@ class TestRetrieveGenerate:
 
         with patch("app.rag_application._get_rag_chain", return_value=mock_chain) as mock_get:
             from app.rag_application import retrieve_generate
+
             retrieve_generate("First call")
             retrieve_generate("Second call")
 

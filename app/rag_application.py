@@ -58,9 +58,7 @@ def setup_pinecone_with_external_data():
     for url in urls:
         loader = WebBaseLoader(url)
         docs = loader.load()
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000, chunk_overlap=200
-        )
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
         all_splits = text_splitter.split_documents(docs)
         _ = vector_store.add_documents(documents=all_splits)
 
@@ -121,9 +119,7 @@ def retrieve_generate(question: str, chat_history: list | None = None) -> str:
         chat_history = []
 
     try:
-        result = _get_rag_chain().invoke(
-            {"input": question, "chat_history": chat_history}
-        )
+        result = _get_rag_chain().invoke({"input": question, "chat_history": chat_history})
         return result["answer"]
     except ResourceExhausted:
         return "The AI model is rate-limited (free tier quota exceeded). Please wait about 30 seconds and try again."

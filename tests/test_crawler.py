@@ -56,23 +56,29 @@ class TestSameDomain:
 
 
 class TestIsProbablyBinary:
-    @pytest.mark.parametrize("url", [
-        "https://example.com/file.pdf",
-        "https://example.com/image.jpg",
-        "https://example.com/photo.PNG",
-        "https://example.com/archive.zip",
-        "https://example.com/video.mp4",
-        "https://example.com/app.exe",
-    ])
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "https://example.com/file.pdf",
+            "https://example.com/image.jpg",
+            "https://example.com/photo.PNG",
+            "https://example.com/archive.zip",
+            "https://example.com/video.mp4",
+            "https://example.com/app.exe",
+        ],
+    )
     def test_detects_binary_extensions(self, url):
         assert _is_probably_binary(url) is True
 
-    @pytest.mark.parametrize("url", [
-        "https://example.com/",
-        "https://example.com/about",
-        "https://example.com/blog/post-1",
-        "https://example.com/page.html",
-        "https://example.com/page?ref=pdf",  # query param, not extension
-    ])
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "https://example.com/",
+            "https://example.com/about",
+            "https://example.com/blog/post-1",
+            "https://example.com/page.html",
+            "https://example.com/page?ref=pdf",  # query param, not extension
+        ],
+    )
     def test_passes_html_urls(self, url):
         assert _is_probably_binary(url) is False

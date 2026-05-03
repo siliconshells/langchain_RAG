@@ -12,3 +12,4 @@ beautifulsoup4>=4.12.3
 flask>=2.2.5
 gunicorn>=23.0.0
 pytest>=8.3.3
+ruff>=0.6.0
