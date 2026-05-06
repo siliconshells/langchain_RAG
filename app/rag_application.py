@@ -125,5 +125,19 @@ def retrieve_generate(question: str, chat_history: list | None = None) -> str:
         return "The AI model is rate-limited (free tier quota exceeded). Please wait about 30 seconds and try again."
 
 
+def retrieve_generate_stream(question: str, chat_history: list | None = None):
+    """Yield answer token chunks from the RAG chain as they're generated."""
+    if chat_history is None:
+        chat_history = []
+
+    try:
+        for chunk in _get_rag_chain().stream({"input": question, "chat_history": chat_history}):
+            token = chunk.get("answer")
+            if token:
+                yield token
+    except ResourceExhausted:
+        yield "The AI model is rate-limited (free tier quota exceeded). Please wait about 30 seconds and try again."
+
+
 if __name__ == "__main__":
     print(retrieve_generate("What did Leonard do at Virginia Tech?"))

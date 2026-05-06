@@ -109,7 +109,7 @@
   </main>
 
   <script>
-    const API_PATH = "/ask";
+    const API_PATH = "/ask-stream";
 
     const $q        = document.getElementById("q");
     const $send     = document.getElementById("send");
@@ -174,6 +174,18 @@
       if (el) el.remove();
     }
 
+    function createAiBubble() {
+      removeEmptyState();
+      const wrapper = document.createElement("div");
+      wrapper.className = "msg-wrapper msg-wrapper--ai";
+      const bubble = document.createElement("div");
+      bubble.className = "msg msg-ai";
+      wrapper.appendChild(bubble);
+      chatWindow.appendChild(wrapper);
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+      return bubble;
+    }
+
     async function ask() {
       const question = $q.value.trim();
       if (!question) return;
@@ -187,23 +199,86 @@
       setLoading(true);
       appendTyping();
 
+      let bubble = null;
+      let answer = "";
+      let buffer = "";
+      let errored = false;
+      let errorMessage = "";
+
       try {
         const res = await fetch(API_PATH, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "Accept": "text/event-stream" },
           body: JSON.stringify({ question, chatHistory: historyToSend }),
         });
 
-        const data = await res.json().catch(() => ({}));
-        removeTyping();
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data?.error || res.statusText);
+        }
 
-        if (!res.ok) throw new Error(data?.error || res.statusText);
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
 
-        const answer = data.answer ?? "(no answer)";
-        messages.push({ role: "ai", content: answer });
-        appendBubble("ai", answer);
+        // SSE parser: events are separated by blank lines, payload lines start with "data: ".
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+
+          let sep;
+          while ((sep = buffer.indexOf("\n\n")) !== -1) {
+            const event = buffer.slice(0, sep);
+            buffer = buffer.slice(sep + 2);
+
+            const dataLines = event
+              .split("\n")
+              .filter((l) => l.startsWith("data: "))
+              .map((l) => l.slice(6));
+            if (!dataLines.length) continue;
+            const data = dataLines.join("\n");
+
+            if (data === "[DONE]") {
+              buffer = "";
+              break;
+            }
+
+            let parsed;
+            try { parsed = JSON.parse(data); }
+            catch { continue; }
+
+            if (parsed.error) {
+              errored = true;
+              errorMessage = parsed.error;
+              continue;
+            }
+
+            if (parsed.token) {
+              if (!bubble) {
+                removeTyping();
+                bubble = createAiBubble();
+              }
+              answer += parsed.token;
+              bubble.innerHTML = marked.parse(answer);
+              chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
+          }
+        }
+
+        if (errored) throw new Error(errorMessage);
+
+        if (!answer) {
+          if (!bubble) {
+            removeTyping();
+            bubble = createAiBubble();
+          }
+          bubble.textContent = "(no answer)";
+        }
+
+        messages.push({ role: "ai", content: answer || "(no answer)" });
       } catch (err) {
         removeTyping();
+        if (bubble) bubble.remove();
         messages.pop(); // drop the user turn so history stays clean
         appendBubble("ai", "Error: " + (err?.message || String(err)));
         $status.textContent = "Failed";

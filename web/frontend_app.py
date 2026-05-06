@@ -1,9 +1,11 @@
+import json
 import os
 
 import requests
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, Response, jsonify, render_template, request
 
 FASTAPI_GRAPHQL_URL = os.getenv("FASTAPI_GRAPHQL_URL", "http://localhost:8000/v1/graphql")
+FASTAPI_STREAM_URL = os.getenv("FASTAPI_STREAM_URL", "http://localhost:8000/v1/stream")
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
 
@@ -52,6 +54,45 @@ def ask():
         return jsonify({"answer": answer})
     except requests.RequestException as e:
         return jsonify({"error": str(e)}), 502
+
+
+@app.post("/ask-stream")
+def ask_stream():
+    data = request.get_json(silent=True) or {}
+    question = (data.get("question") or "").strip()
+    chat_history = data.get("chatHistory") or []
+
+    if not question:
+        return jsonify({"error": "Missing 'question'"}), 400
+
+    payload = {"question": question, "chatHistory": chat_history}
+
+    def relay():
+        try:
+            with requests.post(
+                FASTAPI_STREAM_URL,
+                json=payload,
+                stream=True,
+                timeout=300,
+                headers={
+                    "Content-Type": "application/json",
+                    "Accept": "text/event-stream",
+                    "User-Agent": "flask-frontend/1.0",
+                },
+            ) as resp:
+                resp.raise_for_status()
+                for chunk in resp.iter_content(chunk_size=None, decode_unicode=True):
+                    if chunk:
+                        yield chunk
+        except requests.RequestException as e:
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+            yield "data: [DONE]\n\n"
+
+    return Response(
+        relay(),
+        mimetype="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 if __name__ == "__main__":
